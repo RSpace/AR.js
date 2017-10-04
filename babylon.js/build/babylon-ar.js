@@ -45103,7 +45103,7 @@ var Qb=[Ik,Zh,_h,Qj,Qi,Pi,Ri,Ag,sg,qg,rg,yg,kh,jh,Oi,Mj];var Rb=[Jk,ki,ji,gi];va
 			});
 		}, 1);
 	};
-
+/*
 	ARController.prototype._copyImageToHeap = function(image) {
 		if (!image) {
 			image = this.image;
@@ -45129,7 +45129,39 @@ var Qb=[Ik,Zh,_h,Qj,Qi,Pi,Ri,Ag,sg,qg,rg,yg,kh,jh,Oi,Mj];var Rb=[Jk,ki,ji,gi];va
 		}
 		return false;
 	};
+*/
+	
+	ARController.prototype._copyImageToHeap = function(image) {
+		if (!image) {
+			image = this.image;
+		}
 
+		if (image.videoWidth > image.videoHeight)
+		{
+			//landscape
+			this.ctx.drawImage(image, 0, 0, this.canvas.width, this.canvas.height); // draw video
+		}
+		else {
+
+			this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+			//portrait
+			var scale = this.canvas.height / this.canvas.width;
+			var scaledHeight = this.canvas.width*scale;
+			var scaledWidth = this.canvas.height*scale;
+			var marginLeft = ( this.canvas.width - scaledWidth)/2;
+			this.ctx.drawImage(image, marginLeft, 0, scaledWidth, scaledHeight); // draw video
+		}
+
+		var imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+		var data = imageData.data;
+
+		if (this.dataHeap) {
+			this.dataHeap.set( data );
+			return true;
+		}
+		return false;
+	};
+	
 	ARController.prototype._debugMarker = function(marker) {
 		var vertex, pos;
 		vertex = marker.vertex;
@@ -47943,11 +47975,11 @@ THREEx.ArucoMarkerGenerator.createCanvas = function(markerId, width){
 /**
 * @namespace
 */
-var THREE = THREE || require("three");
+// var THREE = THREE || require("three");
 
 /**
 * The WebAR namespace inside the THREE namespace. This namespace includes different utilities to be able to handle WebAR functionalities on top of the ThreeJS framework/engine in an easier way.
-* 
+*
 * NOTE: As a coding standard all the variables/functions starting with an underscore '_' are considered as private and should not be used/called outside of the namespace/class they are defined in.
 * @namespace
 */
@@ -48031,8 +48063,8 @@ THREE.WebAR.VRPointCloud.prototype.getBufferGeometry = function() {
 */
 THREE.WebAR.VRPointCloud.prototype.update = function(updateBufferGeometry, pointsToSkip, transformPoints) {
   if (!this._vrDisplay) return;
-  this._vrDisplay.getPointCloud(this._pointCloud, 
-    !updateBufferGeometry, typeof(pointsToSkip) === "number" ? 
+  this._vrDisplay.getPointCloud(this._pointCloud,
+    !updateBufferGeometry, typeof(pointsToSkip) === "number" ?
       pointsToSkip : 0, !!transformPoints);
   if (!updateBufferGeometry) return;
   if (this._pointCloud.numberOfPoints > 0) {
@@ -48076,11 +48108,11 @@ THREE.WebAR.getIndexFromOrientation = function(orientation) {
 THREE.WebAR.getIndexFromScreenAndSeeThroughCameraOrientations = function(vrDisplay) {
   var screenOrientation = screen.orientation.angle;
   var seeThroughCamera = vrDisplay ? vrDisplay.getSeeThroughCamera() : null;
-  var seeThroughCameraOrientation = seeThroughCamera ? 
+  var seeThroughCameraOrientation = seeThroughCamera ?
     seeThroughCamera.orientation : 0;
-  var seeThroughCameraOrientationIndex = 
+  var seeThroughCameraOrientationIndex =
     THREE.WebAR.getIndexFromOrientation(seeThroughCameraOrientation);
-  var screenOrientationIndex = 
+  var screenOrientationIndex =
     THREE.WebAR.getIndexFromOrientation(screenOrientation);
   ret = screenOrientationIndex - seeThroughCameraOrientationIndex;
   if (ret < 0) {
@@ -48104,9 +48136,9 @@ THREE.WebAR.createVRSeeThroughCameraMesh = function(vrDisplay,
   if (vrDisplay) {
     var seeThroughCamera = vrDisplay.getSeeThroughCamera();
 
-    if (!seeThroughCamera) 
+    if (!seeThroughCamera)
       throw "ERROR: Could not get the see through camera!";
-    
+
     video = seeThroughCamera;
     // HACK: Needed to tell the THREE.VideoTexture that the video is ready and
     // that the texture needs update.
@@ -48120,13 +48152,13 @@ THREE.WebAR.createVRSeeThroughCameraMesh = function(vrDisplay,
     var u = seeThroughCamera.width / seeThroughCamera.textureWidth;
     var v = seeThroughCamera.height / seeThroughCamera.textureHeight;
     geometry.WebAR_textureCoords = [
-      new Float32Array([ 
+      new Float32Array([
         0.0, 0.0,
         0.0, v,
         u, 0.0,
         u, v
       ]),
-      new Float32Array([ 
+      new Float32Array([
         u, 0.0,
         0.0, 0.0,
         u, v,
@@ -48148,7 +48180,7 @@ THREE.WebAR.createVRSeeThroughCameraMesh = function(vrDisplay,
   }
   else {
     var video = document.createElement("video");
-    video.src = typeof(fallbackVideoPath) === "string" ? 
+    video.src = typeof(fallbackVideoPath) === "string" ?
       fallbackVideoPath : "../../resources/videos/sintel.webm";
     video.play();
 
@@ -48161,19 +48193,19 @@ THREE.WebAR.createVRSeeThroughCameraMesh = function(vrDisplay,
     ];
   }
 
-  geometry.addAttribute("position", new THREE.BufferAttribute( 
+  geometry.addAttribute("position", new THREE.BufferAttribute(
     new Float32Array([
-    -1.0,  1.0, 0.0, 
+    -1.0,  1.0, 0.0,
     -1.0, -1.0, 0.0,
-     1.0,  1.0, 0.0, 
+     1.0,  1.0, 0.0,
      1.0, -1.0, 0.0
   ]), 3));
 
   geometry.setIndex(new THREE.BufferAttribute(
     new Uint16Array([0, 1, 2, 2, 1, 3]), 1));
-  geometry.WebAR_textureCoordIndex = 
+  geometry.WebAR_textureCoordIndex =
     THREE.WebAR.getIndexFromScreenAndSeeThroughCameraOrientations(vrDisplay);
-  var textureCoords = 
+  var textureCoords =
     geometry.WebAR_textureCoords[geometry.WebAR_textureCoordIndex];
 
   geometry.addAttribute("uv", new THREE.BufferAttribute(
@@ -48227,7 +48259,7 @@ THREE.WebAR.createVRSeeThroughCameraMesh = function(vrDisplay,
     });
   }
   else {
-    material = new THREE.MeshBasicMaterial( 
+    material = new THREE.MeshBasicMaterial(
       {color: 0xFFFFFF, side: THREE.DoubleSide, map: videoTexture } );
   }
 
@@ -48245,7 +48277,7 @@ THREE.WebAR.updateCameraMeshOrientation = function(vrDisplay, cameraMesh) {
   var textureCoordIndex = THREE.WebAR.getIndexFromScreenAndSeeThroughCameraOrientations(vrDisplay);
   if (textureCoordIndex != cameraMesh.geometry.WebAR_textureCoordIndex) {
     var uvs = cameraMesh.geometry.getAttribute("uv");
-    var textureCoords = 
+    var textureCoords =
       cameraMesh.geometry.WebAR_textureCoords[textureCoordIndex];
     cameraMesh.geometry.WebAR_textureCoordIndex = textureCoordIndex;
     for (var i = 0; i < uvs.length; i++) {
@@ -48263,7 +48295,7 @@ THREE.WebAR.updateCameraMeshOrientation = function(vrDisplay, cameraMesh) {
 * @return {THREE.Camera} A camera instance to be used to correctly render a scene on top of the camera video feed.
 */
 THREE.WebAR.createVRSeeThroughCamera = function(vrDisplay, near, far) {
-  var camera = new THREE.PerspectiveCamera( 60, 
+  var camera = new THREE.PerspectiveCamera( 60,
     window.innerWidth / window.innerHeight, near, far );
   if (vrDisplay) {
     THREE.WebAR.resizeVRSeeThroughCamera(vrDisplay, camera);
@@ -48282,22 +48314,22 @@ THREE.WebAR.resizeVRSeeThroughCamera = function(vrDisplay, camera) {
     var windowWidthBiggerThanHeight = window.innerWidth > window.innerHeight;
     var seeThroughCamera = vrDisplay.getSeeThroughCamera();
     if (seeThroughCamera) {
-      var cameraWidthBiggerThanHeight = 
+      var cameraWidthBiggerThanHeight =
         seeThroughCamera.width > seeThroughCamera.height;
-      var swapWidthAndHeight = 
+      var swapWidthAndHeight =
         !(windowWidthBiggerThanHeight && cameraWidthBiggerThanHeight);
 
-      var width = swapWidthAndHeight ? 
+      var width = swapWidthAndHeight ?
         seeThroughCamera.height : seeThroughCamera.width;
-      var height = swapWidthAndHeight ? 
+      var height = swapWidthAndHeight ?
         seeThroughCamera.width : seeThroughCamera.height;
-      var fx = swapWidthAndHeight ? 
+      var fx = swapWidthAndHeight ?
         seeThroughCamera.focalLengthY : seeThroughCamera.focalLengthX;
-      var fy = swapWidthAndHeight ? 
+      var fy = swapWidthAndHeight ?
         seeThroughCamera.focalLengthX : seeThroughCamera.focalLengthY;
-      var cx = swapWidthAndHeight ? 
+      var cx = swapWidthAndHeight ?
         seeThroughCamera.pointY : seeThroughCamera.pointX;
-      var cy = swapWidthAndHeight ? 
+      var cy = swapWidthAndHeight ?
         seeThroughCamera.pointX : seeThroughCamera.pointY;
 
       var xscale = camera.near / fx;
@@ -48354,7 +48386,7 @@ THREE.WebAR.rotateObject3D = function(normal1, normal2, object3d) {
   else {
     throw "Unknown normal2 type.";
   }
-  THREE.WebAR._normalY.crossVectors(THREE.WebAR._planeNormal, 
+  THREE.WebAR._normalY.crossVectors(THREE.WebAR._planeNormal,
     THREE.WebAR._normalZ).normalize();
   THREE.WebAR._rotationMatrix.elements[ 0] = THREE.WebAR._planeNormal.x;
   THREE.WebAR._rotationMatrix.elements[ 1] = THREE.WebAR._planeNormal.y;
@@ -48385,13 +48417,13 @@ THREE.WebAR.rotateObject3DWithPickingPlane = function(plane, object3d) {
   }
   THREE.WebAR._normalY.set(0.0, 1.0, 0.0);
   var threshold = 0.5;
-  if (Math.abs(THREE.WebAR._planeNormal.dot(THREE.WebAR._worldUp)) > 
+  if (Math.abs(THREE.WebAR._planeNormal.dot(THREE.WebAR._worldUp)) >
     threshold) {
     THREE.WebAR._normalY.set(0.0, 0.0, 1.0);
   }
-  THREE.WebAR._normalZ.crossVectors(THREE.WebAR._planeNormal, 
+  THREE.WebAR._normalZ.crossVectors(THREE.WebAR._planeNormal,
     THREE.WebAR._normalY).normalize();
-  THREE.WebAR._normalY.crossVectors(THREE.WebAR._normalZ, 
+  THREE.WebAR._normalY.crossVectors(THREE.WebAR._normalZ,
     THREE.WebAR._planeNormal).normalize();
   THREE.WebAR._rotationMatrix.elements[ 0] = THREE.WebAR._planeNormal.x;
   THREE.WebAR._rotationMatrix.elements[ 1] = THREE.WebAR._planeNormal.y;
@@ -48428,7 +48460,7 @@ THREE.WebAR.positionObject3DWithPickingPoint = function(point, object3d) {
 * @param {THREE.Object3D} object3d The object3d to be transformed so it is positioned and oriented according to the given point and plane.
 * @param {number} scale The value the object3d will be positioned in the direction of the normal of the plane to be correctly positioned. Objects usually have their position value referenced as the center of the geometry. In this case, positioning the object in the picking point would lead to have the object3d positioned in the plane, not on top of it. this scale value will allow to correctly position the object in the picking point and in the direction of the normal of the plane. Half the size of the object3d would be a correct value in this case.
 */
-THREE.WebAR.positionAndRotateObject3DWithPickingPointAndPlaneInPointCloud = 
+THREE.WebAR.positionAndRotateObject3DWithPickingPointAndPlaneInPointCloud =
   function(pointAndPlane, object3d, scale) {
   THREE.WebAR.rotateObject3DWithPickingPlane(pointAndPlane.plane, object3d);
   THREE.WebAR.positionObject3DWithPickingPoint(pointAndPlane.point, object3d);
@@ -48441,7 +48473,7 @@ THREE.WebAR.positionAndRotateObject3DWithPickingPointAndPlaneInPointCloud =
 * @param {THREE.Object3D} object3d The object3d to be transformed so it is positioned and oriented according to the given point and plane.
 * @param {number} scale The value the object3d will be positioned in the direction of the normal of the plane to be correctly positioned. Objects usually have their position value referenced as the center of the geometry. In this case, positioning the object in the picking point would lead to have the object3d positioned in the plane, not on top of it. this scale value will allow to correctly position the object in the picking point and in the direction of the normal of the plane. Half the size of the object3d would be a correct value in this case.
 */
-THREE.WebAR.positionAndRotateObject3D = 
+THREE.WebAR.positionAndRotateObject3D =
   function(position, normal1, normal2, object3d, scale) {
   THREE.WebAR.rotateObject3D(normal1, normal2, object3d);
   THREE.WebAR.positionObject3DWithPickingPoint(position, object3d);
@@ -50193,12 +50225,33 @@ ARjs.Source.prototype.onResizeElement = function(mirrorDomElements){
 		_this.copyElementSizeTo(domElement)
 	})
 }
-
+/*
 ARjs.Source.prototype.copyElementSizeTo = function(otherElement){
 	otherElement.style.width = this.domElement.style.width
 	otherElement.style.height = this.domElement.style.height	
 	otherElement.style.marginLeft = this.domElement.style.marginLeft
 	otherElement.style.marginTop = this.domElement.style.marginTop
+}
+*/
+
+ARjs.Source.prototype.copyElementSizeTo = function(otherElement){
+
+	if (window.innerWidth > window.innerHeight)
+	{
+		//landscape
+		otherElement.style.width = this.domElement.style.width
+		otherElement.style.height = this.domElement.style.height
+		otherElement.style.marginLeft = this.domElement.style.marginLeft
+		otherElement.style.marginTop = this.domElement.style.marginTop
+	}
+	else {
+		//portrait
+		otherElement.style.height = this.domElement.style.height
+		otherElement.style.width = (parseInt(otherElement.style.height) * 4/3)+"px";
+		otherElement.style.marginLeft = ((window.innerWidth- parseInt(otherElement.style.width))/2)+"px";
+		otherElement.style.marginTop = 0;
+	}
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
